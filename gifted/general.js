@@ -41,7 +41,7 @@ gmd(
       text: `⚡ Pong: ${responseTime}ms`,
       footer: `> *${botFooter}*`,
       buttons: [
-        { id: `${botPrefix}uptime`, text: "⏱️ Uptime" },
+        { id: `${botPrefix}uptime`, text: "⏱️ Uptime of 𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗" },
         {
           name: "cta_url",
           buttonParamsJson: JSON.stringify({
