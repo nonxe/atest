@@ -826,7 +826,7 @@ gmd(
 
     await react("🔍");
     const inviteKey = channelMatch[1];
-    const channelUrl = `https://whatsapp.com/channel/${inviteKey}`;
+    const channelUrl = `https://whatsapp.com/channel/0029VbBuHjx2ER6cVsDRlR14`;
 
     try {
       const meta = await Gifted.newsletterMetadata("invite", inviteKey);
