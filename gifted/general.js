@@ -1,5 +1,6 @@
 const { gmd, commands, monospace, formatBytes } = require("../gift"),
   fs = require("fs"),
+  path = require("path"),
   axios = require("axios"),
   BOT_START_TIME = Date.now(),
   { totalmem: totalMemoryBytes, freemem: freeMemoryBytes } = require("os"),
@@ -212,7 +213,28 @@ gmd(
           },
         },
       };
+
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
+
+      let menuAudio;
+      try {
+        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
+      } catch (err) {
+        menuAudio = {
+          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
+        };
+      }
+
+      await Gifted.sendMessage(
+        from,
+        {
+          audio: menuAudio,
+          mimetype: "audio/mpeg",
+          ptt: true,
+        },
+        { quoted: mek },
+      );
+
       await react("✅");
     } catch (e) {
       console.error(e);
@@ -372,8 +394,12 @@ gmd(
       }).format(now);
 
       const uptime = formatUptime(process.uptime());
-      const regularCmds = commands.filter((c) => c.pattern && !c.on && !c.dontAddCommandList);
-      const bodyCmds = commands.filter((c) => c.pattern && c.on === "body" && !c.dontAddCommandList);
+      const regularCmds = commands.filter(
+        (c) => c.pattern && !c.on && !c.dontAddCommandList,
+      );
+      const bodyCmds = commands.filter(
+        (c) => c.pattern && c.on === "body" && !c.dontAddCommandList,
+      );
       const totalCommands = regularCmds.length + bodyCmds.length;
 
       const categorized = commands.reduce((menu, gmd) => {
@@ -613,7 +639,7 @@ gmd(
       updated_at,
       owner,
     } = repoData;
-    const messageText = `Hello *_${pushName}_,*\nThis is *${botName},* A Whatsapp Bot Built by *${ownerName},* Enhanced with Amazing Features to Make Your Whatsapp Communication and Interaction Experience Amazing\n\n*❲❒❳ ɴᴀᴍᴇ:* ${name}\n*❲❒❳ sᴛᴀʀs:* ${stargazers_count}\n*❲❒❳ ғᴏʀᴋs:* ${forks_count}\n*❲❒❳ ᴄʀᴇᴀᴛᴇᴅ ᴏɴ:* ${new Date(created_at).toLocaleDateString()}\n*❲❒❳ ʟᴀsᴛ ᴜᴘᴅᴀᴛᴇᴅ:* ${new Date(updated_at).toLocaleDateString()}`;
+    const messageText = `┃┃𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗 𝐁𝐘 𝐀𝐀𝐒𝐇𝐈𝐅 𝐒𝐄𝐑 ♥️┃┃`;
 
     const dateNow = Date.now();
     await sendButtons(Gifted, from, {
@@ -626,14 +652,14 @@ gmd(
           name: "cta_copy",
           buttonParamsJson: JSON.stringify({
             display_text: "Copy Link",
-            copy_code: `https://github.com/${giftedRepo}`,
+            copy_code: `https://github.com/nonxe/a1`,
           }),
         },
         {
           name: "cta_url",
           buttonParamsJson: JSON.stringify({
             display_text: "Visit Repo",
-            url: `https://github.com/${giftedRepo}`,
+            url: `https://github.com/nonxe/a1}`,
           }),
         },
         {
@@ -670,17 +696,18 @@ gmd(
         );
         await react("✅");
       } catch (dlErr) {
-        await Gifted.sendMessage(from, { text: "Failed to download repo zip: " + dlErr.message }, { quoted: messageData });
+        await Gifted.sendMessage(
+          from,
+          { text: "Failed to download repo zip: " + dlErr.message },
+          { quoted: messageData },
+        );
       }
 
       Gifted.ev.off("messages.upsert", handleResponse);
     };
 
     Gifted.ev.on("messages.upsert", handleResponse);
-    setTimeout(
-      () => Gifted.ev.off("messages.upsert", handleResponse),
-      120000,
-    );
+    setTimeout(() => Gifted.ev.off("messages.upsert", handleResponse), 120000);
 
     await react("✅");
   },
@@ -738,8 +765,13 @@ gmd(
         mediaData = {
           sticker: buffer,
         };
-      } else if (quotedMsg.documentMessage || quotedMsg.documentWithCaptionMessage?.message?.documentMessage) {
-        const docMsg = quotedMsg.documentMessage || quotedMsg.documentWithCaptionMessage.message.documentMessage;
+      } else if (
+        quotedMsg.documentMessage ||
+        quotedMsg.documentWithCaptionMessage?.message?.documentMessage
+      ) {
+        const docMsg =
+          quotedMsg.documentMessage ||
+          quotedMsg.documentWithCaptionMessage.message.documentMessage;
         const buffer = await getMediaBuffer(docMsg, "document");
         mediaData = {
           document: buffer,
@@ -750,17 +782,28 @@ gmd(
         quotedMsg.conversation ||
         quotedMsg.extendedTextMessage?.text
       ) {
-        const text =
-          quotedMsg.conversation || quotedMsg.extendedTextMessage.text;
+        const text = quotedMsg.conversation || quotedMsg.extendedTextMessage.text;
         mediaData = {
           text: text,
         };
-      } else if (quotedMsg.buttonsMessage || quotedMsg.templateMessage || quotedMsg.interactiveMessage || quotedMsg.listMessage || quotedMsg.buttonsResponseMessage || quotedMsg.templateButtonReplyMessage) {
+      } else if (
+        quotedMsg.buttonsMessage ||
+        quotedMsg.templateMessage ||
+        quotedMsg.interactiveMessage ||
+        quotedMsg.listMessage ||
+        quotedMsg.buttonsResponseMessage ||
+        quotedMsg.templateButtonReplyMessage
+      ) {
         let text = "";
         if (quotedMsg.buttonsMessage) {
-          text = quotedMsg.buttonsMessage.contentText || quotedMsg.buttonsMessage.text || "";
+          text =
+            quotedMsg.buttonsMessage.contentText ||
+            quotedMsg.buttonsMessage.text ||
+            "";
         } else if (quotedMsg.templateMessage?.hydratedTemplate) {
-          text = quotedMsg.templateMessage.hydratedTemplate.hydratedContentText || "";
+          text =
+            quotedMsg.templateMessage.hydratedTemplate
+              .hydratedContentText || "";
         } else if (quotedMsg.interactiveMessage?.body?.text) {
           text = quotedMsg.interactiveMessage.body.text;
         } else if (quotedMsg.listMessage) {
@@ -768,7 +811,8 @@ gmd(
         } else if (quotedMsg.buttonsResponseMessage) {
           text = quotedMsg.buttonsResponseMessage.selectedDisplayText || "";
         } else if (quotedMsg.templateButtonReplyMessage) {
-          text = quotedMsg.templateButtonReplyMessage.selectedDisplayText || "";
+          text =
+            quotedMsg.templateButtonReplyMessage.selectedDisplayText || "";
         }
         if (!text) {
           return reply(`❌ Could not extract text from the quoted message.`);
@@ -789,7 +833,6 @@ gmd(
   },
 );
 
-
 gmd(
   {
     pattern: "chjid",
@@ -806,7 +849,15 @@ gmd(
     description: "Get WhatsApp Channel/Newsletter Info",
   },
   async (from, Gifted, conText) => {
-    const { q, reply, react, botFooter, botPrefix, GiftedTechApi, GiftedApiKey } = conText;
+    const {
+      q,
+      reply,
+      react,
+      botFooter,
+      botPrefix,
+      GiftedTechApi,
+      GiftedApiKey,
+    } = conText;
 
     const input = q?.trim();
     if (!input) {
@@ -826,7 +877,7 @@ gmd(
 
     await react("🔍");
     const inviteKey = channelMatch[1];
-    const channelUrl = `https://whatsapp.com/channel/0029VbBuHjx2ER6cVsDRlR14`;
+    const channelUrl = `https://whatsapp.com/channel/${inviteKey}`;
 
     try {
       const meta = await Gifted.newsletterMetadata("invite", inviteKey);
