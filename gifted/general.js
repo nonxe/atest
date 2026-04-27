@@ -199,7 +199,7 @@ gmd(
 ╰─────────────⦁`;
 
       const giftedMess = {
-        image: { url: botPic },
+        image: { url: "https://i.ibb.co/5Xjj5sxz/tourl-1777040577237.jpg" },
         caption: menus.trim(),
         contextInfo: {
           mentionedJid: [sender],
