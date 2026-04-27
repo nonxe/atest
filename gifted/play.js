@@ -396,7 +396,7 @@ gmd(
       const buttonId = `video_${firstVideo.id}_${dateNow}`;
       
       await sendButtons(Gifted, from, {
-        title: `${botName} 𝐕𝐈𝐃𝐄𝐎 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑`,
+        title: `𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗 𝐕𝐈𝐃𝐄𝐎 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑`,
         text: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n*Select download format:*`,
         footer: botFooter,
         image: { url: firstVideo.thumbnail || botPic },
