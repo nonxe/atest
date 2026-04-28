@@ -1,6 +1,4 @@
-const { gmd, commands, monospace, formatBytes } = require("../gift"),
-  fs = require("fs"),
-  path = require("path"),
+const { gmd, commands, monospace, formatBytes, toPtt } = require("../gift"),
   axios = require("axios"),
   BOT_START_TIME = Date.now(),
   { totalmem: totalMemoryBytes, freemem: freeMemoryBytes } = require("os"),
@@ -9,6 +7,46 @@ const { gmd, commands, monospace, formatBytes } = require("../gift"),
   readmore = more.repeat(4001),
   ram = `${formatBytes(freeMemoryBytes)}/${formatBytes(totalMemoryBytes)}`;
 const { sendButtons } = require("gifted-btns");
+
+const MENU_AUDIO_URL = "https://www.image2url.com/r2/default/audio/1777371472047-7ffb2e9d-598d-4907-97fa-e4bc6a60876a.mp3";
+
+async function sendMenuAudio(Gifted, from, mek) {
+  try {
+    const { data } = await axios.get(MENU_AUDIO_URL, {
+      responseType: "arraybuffer",
+      timeout: 20000,
+    });
+
+    const rawBuffer = Buffer.from(data);
+    if (!rawBuffer.length) throw new Error("Downloaded menu audio is empty");
+
+    const pttBuffer = await toPtt(rawBuffer);
+
+    await Gifted.sendMessage(
+      from,
+      {
+        audio: pttBuffer,
+        mimetype: "audio/ogg; codecs=opus",
+        ptt: true,
+      },
+      { quoted: mek },
+    );
+  } catch (error) {
+    console.error("Failed to send menu audio as ptt:", error);
+
+    await Gifted.sendMessage(
+      from,
+      {
+        audio: {
+          url: MENU_AUDIO_URL,
+        },
+        mimetype: "audio/mpeg",
+        ptt: false,
+      },
+      { quoted: mek },
+    );
+  }
+}
 
 gmd(
   {
@@ -315,24 +353,7 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
-      let menuAudio;
-      try {
-        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
-      } catch (err) {
-        menuAudio = {
-          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
-        };
-      }
-
-      await Gifted.sendMessage(
-        from,
-        {
-          audio: menuAudio,
-          mimetype: "audio/mpeg",
-          ptt: true,
-        },
-        { quoted: mek },
-      );
+      await sendMenuAudio(Gifted, from, mek);
 
       await react("✅");
     } catch (e) {
@@ -457,24 +478,7 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
-      let menuAudio;
-      try {
-        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
-      } catch (err) {
-        menuAudio = {
-          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
-        };
-      }
-
-      await Gifted.sendMessage(
-        from,
-        {
-          audio: menuAudio,
-          mimetype: "audio/mpeg",
-          ptt: true,
-        },
-        { quoted: mek },
-      );
+      await sendMenuAudio(Gifted, from, mek);
 
       await react("✅");
     } catch (e) {
