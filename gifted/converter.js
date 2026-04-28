@@ -4,7 +4,7 @@ const { StickerTypes } = require("wa-sticker-formatter");
 
 gmd({
     pattern: "sticker",
-    aliases: ["st", "take"],
+    aliases: ["st"],
     category: "converter",
     react: "🔄️",
     description: "Convert image/video/sticker to sticker.",
@@ -98,6 +98,50 @@ gmd({
         console.error("Error in sticker command:", e);
         await react("❌");
         await reply("Failed to convert to sticker");
+    }
+});
+
+gmd({
+    pattern: "take",
+    category: "converter",
+    react: "🔄️",
+    description: "Change replied sticker pack and author metadata.",
+}, async (from, Gifted, conText) => {
+    const { mek, reply, react, quoted } = conText;
+
+    const quotedSticker = quoted?.stickerMessage || quoted?.message?.stickerMessage;
+    if (!quotedSticker) {
+        await react("❌");
+        return reply("Please reply to/quote a sticker");
+    }
+
+    let tempFilePath;
+    let stickerFilePath;
+    try {
+        tempFilePath = await Gifted.downloadAndSaveMediaMessage(quotedSticker, "temp_media");
+        const stickerData = await fs.readFile(tempFilePath);
+        stickerFilePath = gmdRandom(".webp");
+        await fs.writeFile(stickerFilePath, stickerData);
+
+        const updatedStickerBuffer = await gmdSticker(stickerFilePath, {
+            pack: "𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗",
+            author: "𝐁𝐘 𝐀𝐀𝐒𝐇𝐈𝐅 𝐒𝐄𝐑 ♥️",
+            type: StickerTypes.FULL,
+            categories: ["🤩", "🎉"],
+            id: "12345",
+            quality: 75,
+            background: "transparent"
+        });
+
+        await Gifted.sendMessage(from, { sticker: updatedStickerBuffer }, { quoted: mek });
+        await react("✅");
+    } catch (e) {
+        console.error("Error in take command:", e);
+        await react("❌");
+        await reply("Failed to update sticker metadata");
+    } finally {
+        if (tempFilePath) await fs.unlink(tempFilePath).catch(() => {});
+        if (stickerFilePath) await fs.unlink(stickerFilePath).catch(() => {});
     }
 });
 
@@ -307,6 +351,5 @@ gmd({
     }
   }
 );
-
 
 
