@@ -1,4 +1,4 @@
-const { gmd, commands, monospace, formatBytes } = require("../gift"),
+const { gmd, commands, monospace, formatBytes, toPtt } = require("../gift"),
   axios = require("axios"),
   BOT_START_TIME = Date.now(),
   { totalmem: totalMemoryBytes, freemem: freeMemoryBytes } = require("os"),
@@ -8,6 +8,22 @@ const { gmd, commands, monospace, formatBytes } = require("../gift"),
   ram = `${formatBytes(freeMemoryBytes)}/${formatBytes(totalMemoryBytes)}`;
 const { sendButtons } = require("gifted-btns");
 const MENU_OPUS_AUDIO_URL = "https://www.image2url.com/r2/default/audio/1777373430857-76f68d99-4445-4571-ae03-ff65dd0f6e4c.opus";
+let menuAudioPttBuffer = null;
+
+async function getMenuAudioPttBuffer() {
+  if (menuAudioPttBuffer) return menuAudioPttBuffer;
+
+  const response = await axios.get(MENU_OPUS_AUDIO_URL, {
+    responseType: "arraybuffer",
+    timeout: 20000,
+  });
+
+  const rawBuffer = Buffer.from(response.data || []);
+  if (!rawBuffer.length) throw new Error("Menu audio download returned empty buffer");
+
+  menuAudioPttBuffer = await toPtt(rawBuffer);
+  return menuAudioPttBuffer;
+}
 
 gmd(
   {
@@ -314,12 +330,11 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
+      const menuPtt = await getMenuAudioPttBuffer();
       await Gifted.sendMessage(
         from,
         {
-          audio: {
-            url: MENU_OPUS_AUDIO_URL,
-          },
+          audio: menuPtt,
           mimetype: "audio/ogg; codecs=opus",
           ptt: true,
         },
@@ -449,12 +464,11 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
+      const menuPtt = await getMenuAudioPttBuffer();
       await Gifted.sendMessage(
         from,
         {
-          audio: {
-            url: MENU_OPUS_AUDIO_URL,
-          },
+          audio: menuPtt,
           mimetype: "audio/ogg; codecs=opus",
           ptt: true,
         },
