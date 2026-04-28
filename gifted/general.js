@@ -178,37 +178,32 @@ gmd(
 *🍁 Dᴀᴛᴇ Tᴏᴅᴀʏ:* ${monospace(date)}
 *🎗 Tɪᴍᴇ Nᴏᴡ:* ${monospace(time)}
 
-➮Fᴏᴜɴᴅᴇʀ - Gifted Tech
+➮Fᴏᴜɴᴅᴇʀ - AASHIF SER ♥️
 ➮Usᴇʀ - ${monospace(pushName)}
-➮Nᴜᴍ - ${monospace(ownerNumber)} 
+➮Nᴜᴍ - ${monospace("+94768655794")}
 ➮Mᴇᴍᴏʀʏ - ${monospace(ram)}
 
-*🧑‍💻 :* ${monospace(botName)} Iꜱ Aᴠᴀɪʟᴀʙʟᴇ
+*🧑‍💻 :*  𝐀𝐀𝐒𝐇𝐈𝐅 𝐒𝐄𝐑 ♥️ Iꜱ Aᴠᴀɪʟᴀʙʟᴇ
+╭─━─━─━─ • ✧ • ─━─━─━─╮
+      🌠 ＡＬＬ ＭＥＮＵ
+╰─━─━─━─ • ✧ • ─━─━─━─╯
 
-╭──❰ *ALL MENU* ❱
-│🏮 Lɪꜱᴛ
-│🏮 Cᴀᴛᴇɢᴏʀʏ
-│🏮 Hᴇʟᴘ
-│🏮 Aʟɪᴠᴇ
-│🏮 Uᴘᴛɪᴍᴇ
-│🏮 Wᴇᴀᴛʜᴇʀ
-│🏮 Lɪɴᴋ
-│🏮 Cᴘᴜ
-│🏮 Rᴇᴘᴏꜱɪᴛᴏʀʏ
-╰─────────────⦁`;
+   🏮   List
+   🏮   Category
+   🏮   Help
+   🏮   Alive
+   🏮   Uptime
+   🏮   Weather
+   🏮   Link
+   🏮   Cpu
+   🏮   Repository
+
+╰─━─ • 🌙 • ─━─╯`;
 
       const giftedMess = {
-        image: { url: "https://i.ibb.co/5Xjj5sxz/tourl-1777040577237.jpg" },
-        caption: menus.trim(),
+        text: menus.trim(),
         contextInfo: {
           mentionedJid: [sender],
-          forwardingScore: 5,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: newsletterJid,
-            newsletterName: botName,
-            serverMessageId: 0,
-          },
         },
       };
 
