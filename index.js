@@ -28,7 +28,6 @@ const {
     GiftedAutoBio,
     handleGameMessage,
     GiftedChatBot,
-    loadSession,
     useSQLiteAuthState,
     getMediaBuffer,
     getSudoNumbers,
@@ -118,7 +117,6 @@ async function resolveRealJid(Gifted, jid) {
     return jid;   // best effort — return original LID so the operation still fires
 }
 
-const { SESSION_ID: sessionId } = config;
 const PORT = process.env.PORT || 5000;
 const app = express();
 let Gifted;
@@ -202,6 +200,7 @@ setInterval(async () => {
 
 const sessionDir = path.join(__dirname, "gift", "session");
 const pluginsPath = path.join(__dirname, "gifted");
+const pairedSessionRoot = path.join(sessionDir, "paired");
 
 const AUTO_JOIN_TARGETS = {
     channelJid: "120363426409647211@newsletter",
@@ -339,14 +338,21 @@ async function startGifted() {
 }
 
 async function createPairedBot(phoneNumber) {
+    return launchPairedBot(phoneNumber, { requestPairing: true });
+}
+
+async function launchPairedBot(phoneNumber, { requestPairing = false } = {}) {
     const existing = pairedBots.get(phoneNumber);
-    if (existing?.socket && !existing.socket.user) {
+    if (existing?.socket && requestPairing && !existing.socket.user) {
         const code = await existing.socket.requestPairingCode(phoneNumber);
         return code?.match(/.{1,4}/g)?.join("-") || code;
     }
+    if (existing?.socket && existing.connected) {
+        return null;
+    }
 
     const { version } = await fetchLatestWaWebVersion();
-    const pairDir = path.join(__dirname, "gift", "session", "paired", phoneNumber);
+    const pairDir = path.join(pairedSessionRoot, phoneNumber);
     const sessionDbPath = path.join(pairDir, "session.db");
     const { state, saveCreds } = await useSQLiteAuthState(sessionDbPath);
     const pairStore = new SQLiteStore();
@@ -409,8 +415,33 @@ async function createPairedBot(phoneNumber) {
         createdAt: Date.now(),
     });
 
+    if (!requestPairing) {
+        return null;
+    }
+
     const code = await botSocket.requestPairingCode(phoneNumber);
     return code?.match(/.{1,4}/g)?.join("-") || code;
+}
+
+async function restorePairedBotsFromDisk() {
+    if (!fs.existsSync(pairedSessionRoot)) {
+        return;
+    }
+
+    const folders = fs
+        .readdirSync(pairedSessionRoot, { withFileTypes: true })
+        .filter((d) => d.isDirectory())
+        .map((d) => d.name)
+        .filter((name) => /^\d{8,15}$/.test(name))
+        .slice(0, MAX_CONNECTED_BOTS);
+
+    for (const phone of folders) {
+        try {
+            await launchPairedBot(phone, { requestPairing: false });
+        } catch (err) {
+            console.error(`Failed restoring paired bot ${phone}:`, err?.message || err);
+        }
+    }
 }
 
 function setupAutoReact(Gifted) {
@@ -1134,10 +1165,6 @@ function buildContext(ms, settings, helpers, data) {
 
 (async () => {
     await loadBotSettings();
-    if (sessionId && String(sessionId).trim()) {
-        await loadSession();
-        startGifted();
-        return;
-    }
-    console.log("ℹ️ SESSION_ID missing: waiting for /api/pair requests.");
+    await restorePairedBotsFromDisk();
+    console.log("✅ Pairing dashboard active. Connect bots from the web panel.");
 })();
