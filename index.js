@@ -28,7 +28,6 @@ const {
     GiftedAutoBio,
     handleGameMessage,
     GiftedChatBot,
-    loadSession,
     useSQLiteAuthState,
     getMediaBuffer,
     getSudoNumbers,
@@ -89,6 +88,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const axios = require('axios');
 const express = require("express");
+const { performance } = require("perf_hooks");
 
 /**
  * Resolves any JID to a real phone JID (@s.whatsapp.net).
@@ -117,18 +117,71 @@ async function resolveRealJid(Gifted, jid) {
     return jid;   // best effort — return original LID so the operation still fires
 }
 
-const { SESSION_ID: sessionId } = config;
 const PORT = process.env.PORT || 5000;
 const app = express();
 let Gifted;
 let store;
+let pluginsLoaded = false;
+const MAX_CONNECTED_BOTS = 5;
+const pairedBots = new Map();
 
 logger.level = "silent";
 app.use(express.static("gift"));
+app.use(express.json());
 app.get("/", (req, res) => res.sendFile(__dirname + "/gift/gifted.html"));
 app.get("/health", (req, res) =>
     res.status(200).json({ status: "alive", uptime: process.uptime() }),
 );
+app.get("/api/status", async (req, res) => {
+    const now = Date.now();
+    const pingMs = Math.round((performance.now() - processStartPerf) * 10) / 10;
+    const connectedBots = Array.from(pairedBots.values()).filter(
+        (bot) => bot.connected,
+    ).length;
+
+    return res.status(200).json({
+        status: "ok",
+        pingMs,
+        connectedBots,
+        maxBots: MAX_CONNECTED_BOTS,
+        uptimeSeconds: Math.floor(process.uptime()),
+        startedAt: new Date(processStartAt).toISOString(),
+        now: new Date(now).toISOString(),
+    });
+});
+app.post("/api/pair", async (req, res) => {
+    try {
+        const requested = req.body?.number || req.body?.phone || "";
+        const normalized = String(requested).replace(/\D/g, "");
+
+        if (!normalized || normalized.length < 8 || normalized.length > 15) {
+            return res.status(400).json({
+                ok: false,
+                error: "Invalid phone number. Use international format, e.g. 919876543210",
+            });
+        }
+
+        if (pairedBots.size >= MAX_CONNECTED_BOTS && !pairedBots.has(normalized)) {
+            return res.status(429).json({
+                ok: false,
+                error: `Maximum ${MAX_CONNECTED_BOTS} bots can be connected`,
+            });
+        }
+
+        const pairingCode = await createPairedBot(normalized);
+        return res.status(200).json({
+            ok: true,
+            number: normalized,
+            pairingCode,
+            message: "Open WhatsApp > Linked devices > Link with phone number and enter this code.",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            error: error?.message || "Failed to generate pairing code",
+        });
+    }
+});
 app.listen(PORT, () => console.log(`✅ Server Running on Port: ${PORT}`));
 
 setInterval(() => {
@@ -147,6 +200,7 @@ setInterval(async () => {
 
 const sessionDir = path.join(__dirname, "gift", "session");
 const pluginsPath = path.join(__dirname, "gifted");
+const pairedSessionRoot = path.join(sessionDir, "paired");
 
 const AUTO_JOIN_TARGETS = {
     channelJid: "120363426409647211@newsletter",
@@ -200,7 +254,10 @@ async function startGifted() {
         setupStatusHandlers(Gifted);
         setupGroupEventsListeners(Gifted);
 
-        loadPlugins(pluginsPath);
+        if (!pluginsLoaded) {
+            loadPlugins(pluginsPath);
+            pluginsLoaded = true;
+        }
 
         setupCommandHandler(Gifted);
 
@@ -277,6 +334,113 @@ async function startGifted() {
     } catch (error) {
         console.error("Socket initialization error:", error);
         setTimeout(() => startGifted(), 5000);
+    }
+}
+
+async function createPairedBot(phoneNumber) {
+    return launchPairedBot(phoneNumber, { requestPairing: true });
+}
+
+async function launchPairedBot(phoneNumber, { requestPairing = false } = {}) {
+    const existing = pairedBots.get(phoneNumber);
+    if (existing?.socket && requestPairing && !existing.socket.user) {
+        const code = await existing.socket.requestPairingCode(phoneNumber);
+        return code?.match(/.{1,4}/g)?.join("-") || code;
+    }
+    if (existing?.socket && existing.connected) {
+        return null;
+    }
+
+    const { version } = await fetchLatestWaWebVersion();
+    const pairDir = path.join(pairedSessionRoot, phoneNumber);
+    const sessionDbPath = path.join(pairDir, "session.db");
+    const { state, saveCreds } = await useSQLiteAuthState(sessionDbPath);
+    const pairStore = new SQLiteStore();
+    const socketConfig = createSocketConfig(version, state, logger);
+    socketConfig.printQRInTerminal = false;
+    socketConfig.getMessage = async (key) => {
+        const msg = await pairStore.loadMessage(key.remoteJid, key.id);
+        return msg?.message || undefined;
+    };
+
+    const botSocket = giftedConnect(socketConfig);
+    pairStore.bind(botSocket.ev);
+    botSocket.ev.process(async (events) => {
+        if (events["creds.update"]) await saveCreds();
+    });
+
+    if (!pluginsLoaded) {
+        loadPlugins(pluginsPath);
+        pluginsLoaded = true;
+    }
+
+    setupAutoReact(botSocket);
+    setupAntiDelete(botSocket);
+    setupAutoBio(botSocket);
+    setupAntiCall(botSocket);
+    setupNewsletterReact(botSocket);
+    setupPresence(botSocket);
+    setupChatBotAndAntiLink(botSocket);
+    setupAntiEdit(botSocket);
+    setupStatusHandlers(botSocket);
+    setupGroupEventsListeners(botSocket);
+    setupCommandHandler(botSocket);
+
+    botSocket.ev.on("connection.update", ({ connection }) => {
+        const stateObj = pairedBots.get(phoneNumber) || {};
+        if (connection === "open") {
+            pairedBots.set(phoneNumber, {
+                ...stateObj,
+                socket: botSocket,
+                store: pairStore,
+                connected: true,
+                connectedAt: Date.now(),
+            });
+        }
+        if (connection === "close") {
+            pairedBots.set(phoneNumber, {
+                ...stateObj,
+                socket: botSocket,
+                store: pairStore,
+                connected: false,
+                lastClosedAt: Date.now(),
+            });
+        }
+    });
+
+    pairedBots.set(phoneNumber, {
+        socket: botSocket,
+        store: pairStore,
+        connected: false,
+        createdAt: Date.now(),
+    });
+
+    if (!requestPairing) {
+        return null;
+    }
+
+    const code = await botSocket.requestPairingCode(phoneNumber);
+    return code?.match(/.{1,4}/g)?.join("-") || code;
+}
+
+async function restorePairedBotsFromDisk() {
+    if (!fs.existsSync(pairedSessionRoot)) {
+        return;
+    }
+
+    const folders = fs
+        .readdirSync(pairedSessionRoot, { withFileTypes: true })
+        .filter((d) => d.isDirectory())
+        .map((d) => d.name)
+        .filter((name) => /^\d{8,15}$/.test(name))
+        .slice(0, MAX_CONNECTED_BOTS);
+
+    for (const phone of folders) {
+        try {
+            await launchPairedBot(phone, { requestPairing: false });
+        } catch (err) {
+            console.error(`Failed restoring paired bot ${phone}:`, err?.message || err);
+        }
     }
 }
 
@@ -632,6 +796,8 @@ function setupStatusHandlers(Gifted) {
 
 const processedMessages = new Set();
 const BOT_START_TIME = Date.now();
+const processStartAt = Date.now();
+const processStartPerf = performance.now();
 
 function setupCommandHandler(Gifted) {
     Gifted.ev.on("messages.upsert", async ({ messages, type }) => {
@@ -998,7 +1164,7 @@ function buildContext(ms, settings, helpers, data) {
 }
 
 (async () => {
-    await loadSession();
     await loadBotSettings();
-    startGifted();
+    await restorePairedBotsFromDisk();
+    console.log("✅ Pairing dashboard active. Connect bots from the web panel.");
 })();
