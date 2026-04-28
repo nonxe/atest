@@ -8,6 +8,20 @@ const { gmd, commands, monospace, formatBytes } = require("../gift"),
   ram = `${formatBytes(freeMemoryBytes)}/${formatBytes(totalMemoryBytes)}`;
 const { sendButtons } = require("gifted-btns");
 
+const getVisibleCommands = () =>
+  commands.filter(
+    (command) => command.pattern && !command.dontAddCommandList && !command.on,
+  );
+
+const getCategoryCommands = (categoryName) =>
+  getVisibleCommands().filter(
+    (command) =>
+      (command.category || "other").toLowerCase() === categoryName.toLowerCase(),
+  );
+
+const formatCommandList = (commandList, botPrefix) =>
+  commandList.map((command) => `│ ◇ ${botPrefix}${command.pattern}`).join("\n");
+
 [
   "cinesubz",
   "mvda",
@@ -194,6 +208,11 @@ gmd(
       const totalCommands = commands.filter(
         (command) => command.pattern && !command.dontAddCommandList,
       ).length;
+      const generalCommands = getCategoryCommands("general");
+      const quickAccess = generalCommands
+        .slice(0, 10)
+        .map((command) => `   🏮   ${command.pattern}`)
+        .join("\n");
 
       let menus = `
 *🦄 Uᴘᴛɪᴍᴇ :* ${monospace(uptime)}
@@ -210,15 +229,7 @@ gmd(
       🌠 ＡＬＬ ＭＥＮＵ
 ╰─━─━─━─ • ✧ • ─━─━─━─╯
 
-   🏮   List
-   🏮   Category
-   🏮   Help
-   🏮   Alive
-   🏮   Uptime
-   🏮   Weather
-   🏮   Link
-   🏮   Cpu
-   🏮   Repository
+${quickAccess || "   🏮   menu\n   🏮   list\n   🏮   ping"}
 
 ╰─━─ • 🌙 • ─━─╯`;
 
@@ -402,13 +413,42 @@ gmd(
       }).format(now);
 
       const uptime = formatUptime(process.uptime());
-      const regularCmds = commands.filter(
-        (c) => c.pattern && !c.on && !c.dontAddCommandList,
-      );
+      const regularCmds = getVisibleCommands();
       const bodyCmds = commands.filter(
         (c) => c.pattern && c.on === "body" && !c.dontAddCommandList,
       );
       const totalCommands = regularCmds.length + bodyCmds.length;
+
+      const categoryConfig = [
+        { key: "ai", title: "𝙰𝙸", icon: "❀" },
+        { key: "converter", title: "𝙲𝙾𝙽𝚅𝙴𝚁𝚃𝙴𝚁", icon: "🧚‍♀️" },
+        { key: "downloader", title: "𝙳𝙾𝚆𝙽𝙻𝙾𝘼𝘿𝙀𝚁", icon: "❀" },
+        { key: "game", title: "𝙶𝘼𝙈𝙀", icon: "🎀" },
+        { key: "general", title: "𝙶𝙀𝙉𝙀𝚁𝘼𝙇", icon: "❀" },
+        { key: "group", title: "𝙂𝙍𝙊𝙐𝙋", icon: "❀" },
+        { key: "logo", title: "𝙻𝙊𝙂𝙊", icon: "❀" },
+        { key: "notes", title: "𝙽𝙊𝙏𝙀𝚂", icon: "❀" },
+        { key: "owner", title: "𝙾𝚆𝙉𝙀𝚁", icon: "❀" },
+        { key: "search", title: "𝚂𝙀𝘼𝙍𝘾𝙃", icon: "❀" },
+        { key: "sports", title: "𝚂𝙿𝙾𝚁𝚃𝚂", icon: "❀" },
+        { key: "tempmail", title: "𝚃𝙀𝙈𝙋𝙈𝘼𝙄𝙇", icon: "❀" },
+        { key: "tools", title: "𝚃𝙾𝙾𝙻𝚂", icon: "❀" },
+        { key: "uploader", title: "𝚄𝙋𝙇𝙊𝘼𝘿𝙀𝚁", icon: "❀" },
+        { key: "utility", title: "𝚄𝚃𝙄𝙇𝙄𝚃𝚈", icon: "❀" },
+        { key: "religion", title: "𝚁𝙴𝙻𝙸𝙂𝙸𝙾𝙽", icon: "❀" },
+      ];
+
+      const categorySections = categoryConfig
+        .map(({ key, title, icon }) => {
+          const items = getCategoryCommands(key);
+          if (!items.length) return null;
+
+          return `╭━━━✦❀ ${title} ${icon} ❀✦━━━╮
+${formatCommandList(items, botPrefix)}
+╰━━━━━━━━━━━━━━━╯`;
+        })
+        .filter(Boolean)
+        .join("\n\n");
 
       const menu = `╭─━━━✧ ❀🌸❀ ✧━━━─╮
      🌷 𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗 🌷
@@ -426,170 +466,7 @@ gmd(
 
 💖 𝐁𝐘 𝐀𝐀𝐒𝐇𝐈𝐅 𝐒𝐄𝐑 💖
 
-╭━━━✦❀ 𝙰𝙸 ❀✦━━━╮
-│ ◇ ${botPrefix}chatai
-│ ◇ ${botPrefix}gemini
-│ ◇ ${botPrefix}giftedai
-│ ◇ ${botPrefix}gpt
-│ ◇ ${botPrefix}gpt4
-│ ◇ ${botPrefix}gpt4o
-│ ◇ ${botPrefix}gpt4o-mini
-│ ◇ ${botPrefix}letmegpt
-│ ◇ ${botPrefix}openai
-│ ◇ ${botPrefix}venice
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙲𝙾𝙽𝚅𝙴𝚁𝚃𝙴𝚁 🧚‍♀️ ❀✦━━━╮
-│ ◇ ${botPrefix}sticker
-│ ◇ ${botPrefix}toaudio
-│ ◇ ${botPrefix}toimg
-│ ◇ ${botPrefix}toptt
-│ ◇ ${botPrefix}tovideo
-╰━━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝘿𝙀𝚁 ❀✦━━━╮
-│ ◇ ${botPrefix}play
-│ ◇ ${botPrefix}tiktok
-│ ◇ ${botPrefix}fb
-│ ◇ ${botPrefix}ig
-│ ◇ ${botPrefix}spotify
-│ ◇ ${botPrefix}twitter
-│ ◇ ${botPrefix}apk
-│ ◇ ${botPrefix}gdrive
-│ ◇ ${botPrefix}mediafire
-│ ◇ ${botPrefix}sendaudio
-│ ◇ ${botPrefix}sendvideo
-│ ◇ ${botPrefix}video
-│ ◇ ${botPrefix}snack
-╰━━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙶𝘼𝙈𝙀🎀 ❀✦━━━╮
-│ ◇ ${botPrefix}tictactoe
-│ ◇ ${botPrefix}tttjoin
-│ ◇ ${botPrefix}tttend
-│ ◇ ${botPrefix}dice
-│ ◇ ${botPrefix}diceai
-│ ◇ ${botPrefix}roll
-│ ◇ ${botPrefix}wcg
-│ ◇ ${botPrefix}wcgjoin
-│ ◇ ${botPrefix}wcgend
-│ ◇ ${botPrefix}games
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙶𝙀𝙉𝙀𝚁𝘼𝙇 ❀✦━━━╮
-│ ◇ ${botPrefix}menu
-│ ◇ ${botPrefix}menus
-│ ◇ ${botPrefix}ping
-│ ◇ ${botPrefix}repo
-│ ◇ ${botPrefix}uptime
-│ ◇ ${botPrefix}list
-│ ◇ ${botPrefix}chjid
-│ ◇ ${botPrefix}met
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙂𝙍𝙊𝙐𝙋 ❀✦━━━╮
-│ ◇ ${botPrefix}tagall
-│ ◇ ${botPrefix}everyone
-│ ◇ ${botPrefix}hidetag
-│ ◇ ${botPrefix}kick
-│ ◇ ${botPrefix}add
-│ ◇ ${botPrefix}promote
-│ ◇ ${botPrefix}demote
-│ ◇ ${botPrefix}mute
-│ ◇ ${botPrefix}unmute
-│ ◇ ${botPrefix}welcome
-│ ◇ ${botPrefix}goodbye
-│ ◇ ${botPrefix}setwelcome
-│ ◇ ${botPrefix}setgoodbye
-│ ◇ ${botPrefix}antilinkwarn
-│ ◇ ${botPrefix}antibadwarn
-│ ◇ ${botPrefix}groupname
-│ ◇ ${botPrefix}gcdesc
-│ ◇ ${botPrefix}link
-│ ◇ ${botPrefix}resetlink
-╰━━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙻𝙊𝙂𝙊 ❀✦━━━╮
-│ ◇ ${botPrefix}blackpinklogo
-│ ◇ ${botPrefix}blackpinkstyle
-│ ◇ ${botPrefix}neonglitch
-│ ◇ ${botPrefix}luxurygold
-│ ◇ ${botPrefix}galaxy
-│ ◇ ${botPrefix}galaxystyle
-│ ◇ ${botPrefix}glowingtext
-│ ◇ ${botPrefix}glitchtext
-│ ◇ ${botPrefix}gradienttext
-│ ◇ ${botPrefix}logomaker
-│ ◇ ${botPrefix}logolist
-│ ◇ ${botPrefix}papercut
-│ ◇ ${botPrefix}underwater
-│ ◇ ${botPrefix}summerbeach
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙽𝙊𝙏𝙀𝚂 ❀✦━━━╮
-│ ◇ ${botPrefix}notes
-│ ◇ ${botPrefix}addnote
-│ ◇ ${botPrefix}getnotes
-│ ◇ ${botPrefix}delnote
-│ ◇ ${botPrefix}delallnotes
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝙾𝙒𝙉𝙀𝚁 ❀✦━━━╮
-│ ◇ ${botPrefix}setsudo
-│ ◇ ${botPrefix}getsudo
-│ ◇ ${botPrefix}setbotname
-│ ◇ ${botPrefix}setbotpic
-│ ◇ ${botPrefix}fullpp
-│ ◇ ${botPrefix}setprefix
-│ ◇ ${botPrefix}setmode
-│ ◇ ${botPrefix}update
-│ ◇ ${botPrefix}block
-│ ◇ ${botPrefix}unblock
-│ ◇ ${botPrefix}join
-│ ◇ ${botPrefix}settings
-│ ◇ ${botPrefix}resetsetting
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝚂𝙀𝘼𝙍𝘾𝙃 ❀✦━━━╮
-│ ◇ ${botPrefix}google
-│ ◇ ${botPrefix}yts
-│ ◇ ${botPrefix}lyrics
-│ ◇ ${botPrefix}weather
-│ ◇ ${botPrefix}wallpapers
-│ ◇ ${botPrefix}unsplash
-│ ◇ ${botPrefix}shazam
-│ ◇ ${botPrefix}happymod
-│ ◇ ${botPrefix}apkmirror
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝚃𝙀𝙈𝙋𝙈𝘼𝙄𝙇 ❀✦━━━╮
-│ ◇ ${botPrefix}tempmail
-│ ◇ ${botPrefix}tempinbox
-│ ◇ ${botPrefix}readmail
-│ ◇ ${botPrefix}delmail
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝚃𝙊𝙊𝙇𝚂 ❀✦━━━╮
-│ ◇ ${botPrefix}createqr
-│ ◇ ${botPrefix}readqr
-│ ◇ ${botPrefix}remini
-│ ◇ ${botPrefix}tinyurl
-│ ◇ ${botPrefix}shortener
-│ ◇ ${botPrefix}photoeditor
-│ ◇ ${botPrefix}fancy
-│ ◇ ${botPrefix}emojimix
-│ ◇ ${botPrefix}define
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝚄𝙋𝙇𝙊𝘼𝘿𝙀𝚁 ❀✦━━━╮
-│ ◇ ${botPrefix}catbox
-│ ◇ ${botPrefix}imgbb
-│ ◇ ${botPrefix}pixhost
-╰━━━━━━━━━━━━━━━╯
-
-╭━━━✦❀ 𝚄𝚃𝙄𝙇𝙄𝚃𝚈 ❀✦━━━╮
-│ ◇ ${botPrefix}onwa
-╰━━━━━━━━━━━━━━━╯
+${categorySections}
 
 ✧･ﾟ: *Aashif Xeon* ･ﾟ✧
       💗 Made with love 💗`;
