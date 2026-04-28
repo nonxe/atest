@@ -3,74 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>𝐀𝐓𝐀𝐒𝐒𝐀-𝐌𝐃 | WABOT</title>
-
-    <!-- Metadata for SEO -->
-    <meta name="description" content="𝐀𝐓𝐀𝐒𝐒𝐀-𝐌𝐃 | WABOT">
-    <meta property="og:title" content="𝐀𝐓𝐀𝐒𝐒𝐀-𝐌𝐃 | WABOT">
-    <meta property="og:description" content="Hey Dude, 𝐀𝐓𝐀𝐒𝐒𝐀-𝐌𝐃 is Active and Running">
-    <meta property="og:image" content="https://telegra.ph/file/c2a4d8d65722553da4c89.jpg">
-    <link rel="icon" href="https://telegra.ph/file/c2a4d8d65722553da4c89.jpg">
-
+    <title>ATASSA-MD | Pairing Dashboard</title>
     <style>
+        :root {
+            color-scheme: dark;
+        }
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #121212;
-            color: white;
-            font-family: Arial, sans-serif;
-            flex-direction: column;
-        }
-
-        .glow {
-            font-size: 2em;
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: #0f1117;
             color: #fff;
-            text-align: center;
-            animation: glowing 10s infinite;
+            font-family: Arial, sans-serif;
+            padding: 24px;
         }
-
-        @keyframes glowing {
-            0% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff0000, 0 0 50px #ff0000; }
-            20% { text-shadow: 0 0 10px #ff9900, 0 0 20px #ff9900, 0 0 30px #ff9900, 0 0 40px #ff9900, 0 0 50px #ff9900; }
-            40% { text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00, 0 0 30px #ffff00, 0 0 40px #ffff00, 0 0 50px #ffff00; }
-            60% { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00, 0 0 50px #00ff00; }
-            80% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff, 0 0 50px #00ffff; }
-            100% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff0000, 0 0 50px #ff0000; }
+        .card {
+            width: 100%;
+            max-width: 560px;
+            border-radius: 14px;
+            background: #161b22;
+            border: 1px solid #2c313a;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
         }
-
-        .developer {
-            font-size: 1.2em;
-            margin-top: 20px;
-            color: #aaa;
+        h1 {
+            margin: 0 0 10px;
+            font-size: 1.4rem;
+        }
+        p {
+            margin: 0 0 16px;
+            color: #c5c9d3;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .tile {
+            border: 1px solid #2c313a;
+            background: #11161e;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .tile small {
+            color: #8d96a6;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .tile b {
+            font-size: 1.1rem;
+        }
+        form {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        input, button {
+            border-radius: 10px;
+            border: 1px solid #2c313a;
+            background: #0d1117;
+            color: #fff;
+            padding: 10px 12px;
+        }
+        input {
+            flex: 1;
+        }
+        button {
+            background: #1f6feb;
+            border-color: #1f6feb;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #result {
+            margin-top: 14px;
+            border: 1px dashed #2c313a;
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 44px;
+            background: #0f141c;
+            color: #dbe3f2;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
-    <div class="glow">✅ DEPLOYMENT SUCCESSFUL,<br>𝐀𝐓𝐀𝐒𝐒𝐀-𝐌𝐃 𝐕𝟓 𝐂𝐎𝐍𝐍𝐄𝐂𝐓𝐄𝐃!</div> </br>
-    <div class="current-info" id="Info">Loading...</div>
-    <div class="developer">Developed by GiftedTech</div>
-</body>
-<script>
-    function updateInfo() {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-      const dayName = dayNames[now.getDay()];
-      const date = now.toLocaleDateString(); // Format date as MM/DD/YYYY
+<div class="card">
+    <h1>✅ ATASSA-MD Pairing Panel</h1>
+    <p>Heroku pe deploy karo, Open App pe click karo, number dalo aur pairing code se bot connect karo.</p>
 
-      const timeString = `${hours}:${minutes}:${seconds}`;
-      const infoString = `Time: ${timeString} | Date: ${date} | Day: ${dayName}`;
-      document.getElementById('Info').textContent = infoString;
+    <div class="stats">
+        <div class="tile">
+            <small>Ping</small>
+            <b id="ping">--</b>
+        </div>
+        <div class="tile">
+            <small>Connected Bots</small>
+            <b id="connected">0 / 5</b>
+        </div>
+    </div>
+
+    <form id="pairForm">
+        <input id="number" type="text" placeholder="Enter number (e.g. 919876543210)" required />
+        <button type="submit">Get Pair Code</button>
+    </form>
+
+    <div id="result">Status: Ready.</div>
+</div>
+
+<script>
+    async function refreshStatus() {
+        try {
+            const res = await fetch('/api/status');
+            const data = await res.json();
+            document.getElementById('ping').textContent = `${data.pingMs} ms`;
+            document.getElementById('connected').textContent = `${data.connectedBots} / ${data.maxBots}`;
+        } catch (_) {}
     }
 
-    // Update info every second
-    setInterval(updateInfo, 1000);
+    document.getElementById('pairForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('number');
+        const result = document.getElementById('result');
+        result.textContent = 'Generating pairing code...';
+        try {
+            const res = await fetch('/api/pair', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ number: input.value.trim() })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to generate code');
+            result.textContent = `Pairing Code for ${data.number}: ${data.pairingCode}\n\nWhatsApp > Linked devices > Link with phone number`;
+            input.value = '';
+            refreshStatus();
+        } catch (err) {
+            result.textContent = `Error: ${err.message}`;
+        }
+    });
 
-    // Initial call to set info immediately
-    updateInfo();
+    refreshStatus();
+    setInterval(refreshStatus, 5000);
 </script>
+</body>
 </html>
