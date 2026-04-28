@@ -8,6 +8,28 @@ const { gmd, commands, monospace, formatBytes } = require("../gift"),
   ram = `${formatBytes(freeMemoryBytes)}/${formatBytes(totalMemoryBytes)}`;
 const { sendButtons } = require("gifted-btns");
 
+[
+  "cinesubz",
+  "mvda",
+  "isaidta",
+  "baiscopes",
+  "sinhalasub",
+].forEach((commandName) => {
+  gmd(
+    {
+      pattern: commandName,
+      react: "🌙",
+      category: "general",
+      description: `Upcoming update for ${commandName}`,
+    },
+    async (_from, _Gifted, conText) => {
+      const { reply } = conText;
+
+      return reply(`.${commandName} is coming soong! ♥️\n\nFollow for more updates: \nhttps://whatsapp.com/channel/0029VbBuHjx2ER6cVsDRlR14\n\n╰─━─ • 🌙 • ─━─╯`);
+    },
+  );
+});
+
 gmd(
   {
     pattern: "ping",
