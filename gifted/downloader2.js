@@ -30,6 +30,125 @@ function extractButtonId(msg) {
 
 gmd(
     {
+        pattern: "download",
+        category: "downloader",
+        react: "⬇️",
+        aliases: ["directdl", "directdownload", "filedl"],
+        description: "Download a file from a direct link and send to WhatsApp",
+    },
+    async (from, Gifted, conText) => {
+        const { q, mek, reply, react, botPrefix } = conText;
+        const url = q?.trim();
+
+        if (!url) {
+            await react("❌");
+            return reply(
+                `Please provide a direct download URL.\n\n*Usage:* ${botPrefix}download https://example.com/file.mp4`,
+            );
+        }
+
+        let parsed;
+        try {
+            parsed = new URL(url);
+            if (!["http:", "https:"].includes(parsed.protocol)) {
+                throw new Error("Invalid protocol");
+            }
+        } catch {
+            await react("❌");
+            return reply(
+                "Please provide a valid direct HTTP/HTTPS download URL.",
+            );
+        }
+
+        await react("⏳");
+
+        try {
+            const head = await axios.head(url, {
+                maxRedirects: 5,
+                timeout: 20000,
+                validateStatus: () => true,
+            });
+
+            const directUrl = head?.request?.res?.responseUrl || url;
+            const headerMime =
+                head?.headers?.["content-type"]?.split(";")[0]?.trim() || "";
+            const mimetype = headerMime || getMimeFromUrl(directUrl);
+            const mimeCategory = getMimeCategory(mimetype);
+
+            const sizeFromHead = Number(head?.headers?.["content-length"] || 0);
+            let fileSize = Number.isFinite(sizeFromHead) ? sizeFromHead : 0;
+            if (!fileSize || fileSize <= 0) {
+                fileSize = await getFileSize(directUrl);
+            }
+
+            const sendAsDoc =
+                fileSize > MAX_MEDIA_SIZE ||
+                mimeCategory === "document" ||
+                mimeCategory === "unknown";
+
+            const nameFromUrl = decodeURIComponent(
+                (new URL(directUrl).pathname.split("/").pop() || "").trim(),
+            );
+            const fileName =
+                (nameFromUrl && nameFromUrl.replace(/[^\w\s.-]/g, "_")) ||
+                "downloaded_file";
+
+            const caption = `*File:* ${fileName}\n*Size:* ${fileSize ? (fileSize / (1024 * 1024)).toFixed(2) + " MB" : "Unknown"}`;
+
+            if (mimeCategory === "audio" && !sendAsDoc) {
+                await Gifted.sendMessage(
+                    from,
+                    {
+                        audio: { url: directUrl },
+                        mimetype: mimetype || "audio/mpeg",
+                    },
+                    { quoted: mek },
+                );
+            } else if (mimeCategory === "video" && !sendAsDoc) {
+                await Gifted.sendMessage(
+                    from,
+                    {
+                        video: { url: directUrl },
+                        mimetype: mimetype || "video/mp4",
+                        caption,
+                    },
+                    { quoted: mek },
+                );
+            } else if (mimeCategory === "image" && !sendAsDoc) {
+                await Gifted.sendMessage(
+                    from,
+                    {
+                        image: { url: directUrl },
+                        caption,
+                    },
+                    { quoted: mek },
+                );
+            } else {
+                await Gifted.sendMessage(
+                    from,
+                    {
+                        document: { url: directUrl },
+                        fileName,
+                        mimetype: mimetype || "application/octet-stream",
+                        caption,
+                    },
+                    { quoted: mek },
+                );
+            }
+
+            await react("✅");
+        } catch (error) {
+            console.error("Direct download error:", error);
+            await react("❌");
+            return reply(
+                `Failed to download file. Make sure it is a direct link.\n\nError: ${error.message}`,
+            );
+        }
+    },
+);
+
+gmd(
+    {
         pattern: "spotify",
         category: "downloader",
         react: "🎧",
