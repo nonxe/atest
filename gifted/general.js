@@ -1,6 +1,4 @@
 const { gmd, commands, monospace, formatBytes } = require("../gift"),
-  fs = require("fs"),
-  path = require("path"),
   axios = require("axios"),
   BOT_START_TIME = Date.now(),
   { totalmem: totalMemoryBytes, freemem: freeMemoryBytes } = require("os"),
@@ -9,6 +7,7 @@ const { gmd, commands, monospace, formatBytes } = require("../gift"),
   readmore = more.repeat(4001),
   ram = `${formatBytes(freeMemoryBytes)}/${formatBytes(totalMemoryBytes)}`;
 const { sendButtons } = require("gifted-btns");
+const MENU_OPUS_AUDIO_URL = "https://www.image2url.com/r2/default/audio/1777373430857-76f68d99-4445-4571-ae03-ff65dd0f6e4c.opus";
 
 gmd(
   {
@@ -315,20 +314,13 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
-      let menuAudio;
-      try {
-        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
-      } catch (err) {
-        menuAudio = {
-          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
-        };
-      }
-
       await Gifted.sendMessage(
         from,
         {
-          audio: menuAudio,
-          mimetype: "audio/mpeg",
+          audio: {
+            url: MENU_OPUS_AUDIO_URL,
+          },
+          mimetype: "audio/ogg; codecs=opus",
           ptt: true,
         },
         { quoted: mek },
@@ -457,20 +449,13 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
-      let menuAudio;
-      try {
-        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
-      } catch (err) {
-        menuAudio = {
-          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
-        };
-      }
-
       await Gifted.sendMessage(
         from,
         {
-          audio: menuAudio,
-          mimetype: "audio/mpeg",
+          audio: {
+            url: MENU_OPUS_AUDIO_URL,
+          },
+          mimetype: "audio/ogg; codecs=opus",
           ptt: true,
         },
         { quoted: mek },
