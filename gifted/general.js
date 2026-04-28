@@ -454,16 +454,6 @@ gmd(
       const giftedMess = {
         image: { url: "https://i.ibb.co/5Xjj5sxz/tourl-1777040577237.jpg" },
         caption: `${menu.trim()}\n\n> *${botFooter}*`,
-        contextInfo: {
-          mentionedJid: [sender],
-          forwardingScore: 5,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: newsletterJid,
-            newsletterName: botName,
-            serverMessageId: 0,
-          },
-        },
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
