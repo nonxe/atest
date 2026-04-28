@@ -1,6 +1,4 @@
 const { gmd, commands, monospace, formatBytes } = require("../gift"),
-  fs = require("fs"),
-  path = require("path"),
   axios = require("axios"),
   BOT_START_TIME = Date.now(),
   { totalmem: totalMemoryBytes, freemem: freeMemoryBytes } = require("os"),
@@ -315,19 +313,12 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
-      let menuAudio;
-      try {
-        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
-      } catch (err) {
-        menuAudio = {
-          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
-        };
-      }
-
       await Gifted.sendMessage(
         from,
         {
-          audio: menuAudio,
+          audio: {
+            url: "https://www.image2url.com/r2/default/audio/1777371472047-7ffb2e9d-598d-4907-97fa-e4bc6a60876a.mp3",
+          },
           mimetype: "audio/mpeg",
           ptt: true,
         },
@@ -457,19 +448,12 @@ gmd(
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
 
-      let menuAudio;
-      try {
-        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
-      } catch (err) {
-        menuAudio = {
-          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
-        };
-      }
-
       await Gifted.sendMessage(
         from,
         {
-          audio: menuAudio,
+          audio: {
+            url: "https://www.image2url.com/r2/default/audio/1777371472047-7ffb2e9d-598d-4907-97fa-e4bc6a60876a.mp3",
+          },
           mimetype: "audio/mpeg",
           ptt: true,
         },
