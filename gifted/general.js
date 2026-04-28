@@ -215,26 +215,6 @@ gmd(
       };
 
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
-
-      let menuAudio;
-      try {
-        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
-      } catch (err) {
-        menuAudio = {
-          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
-        };
-      }
-
-      await Gifted.sendMessage(
-        from,
-        {
-          audio: menuAudio,
-          mimetype: "audio/mpeg",
-          ptt: true,
-        },
-        { quoted: mek },
-      );
-
       await react("✅");
     } catch (e) {
       console.error(e);
@@ -334,6 +314,26 @@ gmd(
         },
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
+
+      let menuAudio;
+      try {
+        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
+      } catch (err) {
+        menuAudio = {
+          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
+        };
+      }
+
+      await Gifted.sendMessage(
+        from,
+        {
+          audio: menuAudio,
+          mimetype: "audio/mpeg",
+          ptt: true,
+        },
+        { quoted: mek },
+      );
+
       await react("✅");
     } catch (e) {
       console.error(e);
@@ -466,6 +466,26 @@ gmd(
         },
       };
       await Gifted.sendMessage(from, giftedMess, { quoted: mek });
+
+      let menuAudio;
+      try {
+        menuAudio = fs.readFileSync(path.join(__dirname, "../yensets/menu.mp3"));
+      } catch (err) {
+        menuAudio = {
+          url: "https://raw.githubusercontent.com/nonxe/a1/8b4dc31e14b07ef590343d0897cad0516fda2ec5/yensets/menu.mp3",
+        };
+      }
+
+      await Gifted.sendMessage(
+        from,
+        {
+          audio: menuAudio,
+          mimetype: "audio/mpeg",
+          ptt: true,
+        },
+        { quoted: mek },
+      );
+
       await react("✅");
     } catch (e) {
       console.error(e);
