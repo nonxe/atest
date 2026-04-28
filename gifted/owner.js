@@ -40,7 +40,7 @@ gmd(
     description: "Get Bot Owner.",
   },
   async (from, Gifted, conText) => {
-    const { mek, reply, react, isSuperUser, ownerNumber, ownerName, botName } =
+    const { mek, reply, react, isSuperUser, botName } =
       conText;
 
     if (!isSuperUser) {
@@ -49,19 +49,21 @@ gmd(
     }
 
     try {
+      const ownerCardName = "𝐀𝐀𝐒𝐇𝐈𝐅 𝐒𝐄𝐑 ♥️";
+      const ownerCardNumber = "94768655794";
       const vcard =
         "BEGIN:VCARD\n" +
         "VERSION:3.0\n" +
-        `FN:${ownerName}\n` +
+        `FN:${ownerCardName}\n` +
         `ORG:${botName};\n` +
-        `TEL;type=CELL;type=VOICE;waid=${ownerNumber}:${ownerNumber}\n` +
+        `TEL;type=CELL;type=VOICE;waid=${ownerCardNumber}:${ownerCardNumber}\n` +
         "END:VCARD";
 
       await Gifted.sendMessage(
         from,
         {
           contacts: {
-            displayName: ownerName,
+            displayName: ownerCardName,
             contacts: [{ vcard }],
           },
         },
