@@ -317,7 +317,7 @@ gmd(
         from,
         {
           audio: {
-            url: "https://www.image2url.com/r2/default/audio/1777371472047-7ffb2e9d-598d-4907-97fa-e4bc6a60876a.mp3",
+            url: "https://www.image2url.com/r2/default/audio/1777373430857-76f68d99-4445-4571-ae03-ff65dd0f6e4c.opus",
           },
           mimetype: "audio/mpeg",
           ptt: true,
@@ -325,7 +325,7 @@ gmd(
         { quoted: mek },
       );
 
-      await react("✅");
+      await react("👋");
     } catch (e) {
       console.error(e);
       reply(`${e}`);
@@ -336,7 +336,7 @@ gmd(
 gmd(
   {
     pattern: "menu",
-    aliases: ["help", "men", "allmenu"],
+    aliases: ["help", "men", "allmenu", "as"],
     react: "🪀",
     category: "general",
     description: "Fetch bot main menu",
