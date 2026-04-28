@@ -34,7 +34,7 @@ const DEFAULT_SETTINGS = {
     OWNER_NAME: "𝐀𝐀𝐒𝐇𝐈𝐅 𝐒𝐄𝐑 ♥️",
     OWNER_NUMBER: "94768655794",
     BOT_NAME: "𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗",
-    FOOTER: "┃𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗┃",
+    FOOTER: "Aashif Xeon ❤️‍🔥",
     CAPTION: "🌎 *Aashif Xeon ❤️‍🔥",
     BOT_PIC: "https://files.giftedtech.co.ke/image/u90mimage.jpg",
     VERSION: packageJson.version || "5.0.0",
