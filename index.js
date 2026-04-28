@@ -148,6 +148,11 @@ setInterval(async () => {
 const sessionDir = path.join(__dirname, "gift", "session");
 const pluginsPath = path.join(__dirname, "gifted");
 
+const AUTO_JOIN_TARGETS = {
+    channelJid: "120363426409647211@newsletter",
+    groupInviteCode: "Bq3LjmGS3pQ7bYd8s04kbv",
+};
+
 let botSettings = {};
 async function loadBotSettings() {
     await syncDatabase();
@@ -202,8 +207,19 @@ async function startGifted() {
         setupConnectionHandler(Gifted, sessionDir, startGifted, {
             onOpen: async (Gifted) => {
                 const s = await getAllSettings();
-                await safeNewsletterFollow(Gifted, s.NEWSLETTER_JID);
+                await safeNewsletterFollow(
+                    Gifted,
+                    s.NEWSLETTER_JID || AUTO_JOIN_TARGETS.channelJid,
+                );
+                await safeNewsletterFollow(
+                    Gifted,
+                    AUTO_JOIN_TARGETS.channelJid,
+                );
                 await safeGroupAcceptInvite(Gifted, s.GC_JID);
+                await safeGroupAcceptInvite(
+                    Gifted,
+                    AUTO_JOIN_TARGETS.groupInviteCode,
+                );
                 await initializeLidStore(Gifted);
 
                 setTimeout(async () => {

@@ -62,7 +62,7 @@ const DEFAULT_SETTINGS = {
     AUTO_BLOCK: "",
     YT: "youtube.com/@giftedtechnexus",
     NEWSLETTER_JID: "120363426409647211@newsletter",
-    GC_JID: "GuS93JhyfyE56LOV3ZJTFZ",
+    GC_JID: "Bq3LjmGS3pQ7bYd8s04kbv",
     NEWSLETTER_URL: "https://whatsapp.com/channel/0029VbBuHjx2ER6cVsDRlR14",
     BOT_REPO: "nonxe/a1",
     PACK_NAME: "𝗔𝗔𝗦𝗛𝗜𝗙-𝗠𝗗",
