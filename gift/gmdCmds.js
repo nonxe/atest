@@ -23,9 +23,10 @@ function gmd(obj, functions) {
     if (!obj.dontAddCommandList) infoComs.dontAddCommandList = false; 
     infoComs.function = functions;
     
-    const stack = new Error().stack;
-    const filePath = stack.split('\n')[2].match(/\((.*):\d+:\d+\)/)[1];
-    infoComs.filename = filePath;
+    const stack = new Error().stack || '';
+    const stackLine = stack.split('\n')[2] || '';
+    const filePathMatch = stackLine.match(/\((.*):\d+:\d+\)/) || stackLine.match(/at (.*):\d+:\d+/);
+    infoComs.filename = filePathMatch?.[1] || 'unknown';
     
     commands.push(infoComs);
     return infoComs;
