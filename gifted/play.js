@@ -233,7 +233,7 @@ gmd(
       await sendButtons(Gifted, from, {
         title: `${botName} 𝐒𝐎𝐍𝐆 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑`,
         text: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n*Select download format:*`,
-        footer: botFooter,
+        footer: "Aashif Xeon ❤️‍🔥",
         image: { url: firstVideo.thumbnail || botPic },
         buttons: [
           { id: `audio_${buttonId}`, text: "Audio 🎶" },
